@@ -12,7 +12,7 @@ import (
 
 func main() {
     url := "https://api.devnet.solana.com"
-    client := gosol.NewClient(url)
+    client := gosol.NewClient(url, nil)
     publicKey := "vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg"
     response, err := client.GetAccountBalance(publicKey)
     if err != nil {

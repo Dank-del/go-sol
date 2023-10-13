@@ -9,8 +9,7 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	url := "https://api.devnet.solana.com"
-	client := gosol.NewClient(url)
+	client := gosol.NewClient(gosol.DevnetURL, nil)
 	publicKey := "vines1vzrYbzLMRdu58ou5XTby4qAqVRLmqo36NKPTg"
 	response, err := client.GetAccountBalance(publicKey)
 	if err != nil {

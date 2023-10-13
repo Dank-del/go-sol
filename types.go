@@ -1,8 +1,15 @@
 package gosol
 
+import "net/http"
+
 // Client represents a JSON-RPC client with a base URL.
 type Client struct {
-	baseURL string
+	BaseURL    string
+	HttpClient *http.Client
+}
+
+type ClientOptions struct {
+	HttpClient *http.Client
 }
 
 // RPCRequest represents a JSON-RPC request object.

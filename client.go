@@ -4,20 +4,22 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/mitchellh/mapstructure"
 )
 
 // NewClient creates a new JSON-RPC client with the specified base URL.
-func NewClient(baseURL string) *Client {
-	return &Client{baseURL}
+func NewClient(baseURL string, opts *ClientOptions) *Client {
+	if opts == nil {
+		opts = DefaultClientOptions
+	}
+	return &Client{BaseURL: baseURL, HttpClient: opts.HttpClient}
 }
 
-// call is a private method to send a JSON-RPC request.
-func (c *Client) call(method string, params interface{}) (map[string]interface{}, error) {
+// makeRequest is a private method to send a JSON-RPC request.
+func (c *Client) makeRequest(method string, params interface{}) (map[string]interface{}, error) {
 	requestPayload := RPCRequest{
-		JSONRPC: "2.0",
+		JSONRPC: JSONRPCVersion,
 		ID:      1,
 		Method:  method,
 		Params:  params,
@@ -28,7 +30,7 @@ func (c *Client) call(method string, params interface{}) (map[string]interface{}
 		return nil, err
 	}
 
-	resp, err := http.Post(c.baseURL, "application/json", bytes.NewBuffer(requestPayloadBytes))
+	resp, err := c.HttpClient.Post(c.BaseURL, "application/json", bytes.NewBuffer(requestPayloadBytes))
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +57,7 @@ func (c *Client) GetAccountBalance(publicKey string) (*RPCResponse[Result[int64]
 		},
 	}
 
-	response, err := c.call("getBalance", params)
+	response, err := c.makeRequest("getBalance", params)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +79,7 @@ func (c *Client) GetAccountInfo(publicKey string) (*RPCResponse[Result[AccountIn
 		},
 	}
 
-	response, err := c.call("getAccountInfo", params)
+	response, err := c.makeRequest("getAccountInfo", params)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +94,7 @@ func (c *Client) GetAccountInfo(publicKey string) (*RPCResponse[Result[AccountIn
 }
 
 func (c *Client) GetBlockHeight() (*RPCResponse[int64], error) {
-	response, err := c.call("getBlockHeight", nil)
+	response, err := c.makeRequest("getBlockHeight", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +122,7 @@ func (c *Client) GetBlock(slotNumber int64, getBlockProps *GetBlockProps) (*RPCR
 		getBlockProps,
 	}
 
-	response, err := c.call("getBlock", params)
+	response, err := c.makeRequest("getBlock", params)
 	if err != nil {
 		return nil, err
 	}
