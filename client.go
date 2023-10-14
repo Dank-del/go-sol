@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
 
 	"github.com/mitchellh/mapstructure"
 )
@@ -34,7 +35,12 @@ func (c *Client) makeRequest(method string, params interface{}) (map[string]inte
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+			fmt.Println("Error closing response body:", err)
+		}
+	}(resp.Body)
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fmt.Errorf("HTTP request failed with status code: %d", resp.StatusCode)
@@ -128,6 +134,22 @@ func (c *Client) GetBlock(slotNumber int64, getBlockProps *GetBlockProps) (*RPCR
 	}
 
 	var rpcResponse RPCResponse[Result[BlockResult]]
+	err = mapstructure.Decode(response, &rpcResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &rpcResponse, nil
+}
+
+// GetBlockProduction retrieves the block production information from the Solana RPC endpoint.
+func (c *Client) GetBlockProduction() (*RPCResponse[Result[GetBlockProdResponse]], error) {
+	response, err := c.makeRequest("getBlockProduction", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var rpcResponse RPCResponse[Result[GetBlockProdResponse]]
 	err = mapstructure.Decode(response, &rpcResponse)
 	if err != nil {
 		return nil, err

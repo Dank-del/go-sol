@@ -62,8 +62,8 @@ type BlockResult struct {
 }
 
 type TransactionElement struct {
-	Meta        Meta                   `json:"meta"`
-	Transaction TransactionTransaction `json:"transaction"`
+	Meta        *Meta                   `json:"meta"`
+	Transaction *TransactionTransaction `json:"transaction"`
 }
 
 type Meta struct {
@@ -76,7 +76,7 @@ type Meta struct {
 	PreBalances       []int64       `json:"preBalances"`
 	PreTokenBalances  []interface{} `json:"preTokenBalances"`
 	Rewards           interface{}   `json:"rewards"`
-	Status            Status        `json:"status"`
+	Status            *Status       `json:"status"`
 }
 
 type Status struct {
@@ -84,13 +84,13 @@ type Status struct {
 }
 
 type TransactionTransaction struct {
-	Message    Message  `json:"message"`
+	Message    *Message `json:"message"`
 	Signatures []string `json:"signatures"`
 }
 
 type Message struct {
 	AccountKeys     []string      `json:"accountKeys"`
-	Header          Header        `json:"header"`
+	Header          *Header       `json:"header"`
 	Instructions    []Instruction `json:"instructions"`
 	RecentBlockhash string        `json:"recentBlockhash"`
 }
@@ -105,4 +105,14 @@ type Instruction struct {
 	Accounts       []int64 `json:"accounts"`
 	Data           string  `json:"data"`
 	ProgramIDIndex int64   `json:"programIdIndex"`
+}
+
+type GetBlockProdResponse struct {
+	ByIdentity map[string][]int64 `json:"byIdentity"`
+	Range      *Range             `json:"range"`
+}
+
+type Range struct {
+	FirstSlot int64 `json:"firstSlot"`
+	LastSlot  int64 `json:"lastSlot"`
 }
